@@ -7,7 +7,7 @@
       "stepType": "data-from-server",
       "description": "aggiungo i representative",
       "data_name": "registration_with_duplication_data",
-      "operation": "save_temp"
+      "operation": "publish"
     }
   ]
 }

@@ -48,6 +48,7 @@ class AmazonSQSConnectionService(QueueConnectionService):
                 http_status = resp.get("ResponseMetadata", {}).get("HTTPStatusCode")
 
                 results.append({"status": "ok", "message_id": mid, "http_status": http_status})
+                print(f" Messaggio pubblicato  MessageId={mid} ")
 
             except Exception as e:
                 results.append({"status": "error", "error": str(e), "message": msg})
@@ -75,6 +76,8 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         for m in msgs:
             all_msgs.append(m)
+
+        print(f" Messaggi ricevuti: {len(msgs)} ")
 
         return all_msgs
 

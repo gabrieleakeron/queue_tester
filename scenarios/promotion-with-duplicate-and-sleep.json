@@ -13,7 +13,7 @@
           "payload[0].transDate": "2025-07-17T12:14:16"
         }
       ],
-      "operation": "save_temp",
+      "operation": "publish",
       "sample_name": "promotion"
     },
     {
@@ -26,7 +26,7 @@
           "payload[0].transDate": "2025-07-17T12:14:16"
         }
       ],
-      "operation": "save_temp",
+      "operation": "publish",
       "sample_name": "promotion"
     },
     {
@@ -44,7 +44,7 @@
           "payload[0].transDate": "2025-07-17T12:14:16"
         }
       ],
-      "operation": "save_temp",
+      "operation": "publish",
       "sample_name": "promotion"
     },
     {
@@ -57,7 +57,7 @@
           "payload[0].transDate": "2025-07-17T12:14:16"
         }
       ],
-      "operation": "save_temp",
+      "operation": "publish",
       "sample_name": "promotion"
     }
   ]
