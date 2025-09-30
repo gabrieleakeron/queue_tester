@@ -3,7 +3,7 @@ from services.file_service import create_json_file_from_dict, load_json_file, fi
 
 DATA_DIR = "data"
 
-def create_data(data: JsonContainerDto):
+def save_data(data: JsonContainerDto):
     return create_json_file_from_dict(DATA_DIR, data.name, data.json_data)
 
 def read_data(name: str) -> JsonContainerDto | None:

@@ -1,0 +1,13 @@
+{
+  "name": "registration-with-duplicate-scenario",
+  "description": "Crea 6 representative di cui uno duplicato",
+  "connectionConfig": "amazon-sqs-connection",
+  "steps": [
+    {
+      "stepType": "data-from-server",
+      "description": "aggiungo i representative",
+      "data_name": "registration_with_duplication_data",
+      "operation": "save_temp"
+    }
+  ]
+}

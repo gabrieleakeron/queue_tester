@@ -9,7 +9,7 @@ from services.operations.operation_executor import OperationExecutor
 
 def create_json(_dir:str, name:str, data: dict):
 
-    dir_path = Path(__file__).parent.parent.parent / "tmp"
+    dir_path = Path(__file__).parent.parent.parent.parent / "tmp"
     dir_path.mkdir(exist_ok=True)
 
     dir_path = dir_path / _dir

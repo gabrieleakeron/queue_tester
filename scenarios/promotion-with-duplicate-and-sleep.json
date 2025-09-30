@@ -1,0 +1,64 @@
+{
+  "name": "promotion-with-duplicate-and-sleep",
+  "description": "Crea 6 representative di cui uno duplicato",
+  "connectionConfig": "amazon-sqs-connection",
+  "steps": [
+    {
+      "stepType": "data-from-sample",
+      "description": "promuovo Gabriele",
+      "data": [
+        {
+          "payload[0].representativeId": "CZ00000001",
+          "payload[0].slAppointDdate": "2025-07-17T12:14:16",
+          "payload[0].transDate": "2025-07-17T12:14:16"
+        }
+      ],
+      "operation": "save_temp",
+      "sample_name": "promotion"
+    },
+    {
+      "stepType": "data-from-sample",
+      "description": "promuovo Mirco",
+      "data": [
+        {
+          "payload[0].representativeId": "CZ00000002",
+          "payload[0].slAppointDdate": "2025-07-17T12:14:16",
+          "payload[0].transDate": "2025-07-17T12:14:16"
+        }
+      ],
+      "operation": "save_temp",
+      "sample_name": "promotion"
+    },
+    {
+      "stepType": "sleep",
+      "description": "dormo tranquillo",
+      "duration": 30
+    },
+    {
+      "stepType": "data-from-sample",
+      "description": "promuovo Lorenzo",
+      "data": [
+        {
+          "payload[0].representativeId": "CZ00000003",
+          "payload[0].slAppointDdate": "2025-07-17T12:14:16",
+          "payload[0].transDate": "2025-07-17T12:14:16"
+        }
+      ],
+      "operation": "save_temp",
+      "sample_name": "promotion"
+    },
+    {
+      "stepType": "data-from-sample",
+      "description": "promuovo ancora Lorenzo",
+      "data": [
+        {
+          "payload[0].representativeId": "CZ00000003",
+          "payload[0].slAppointDdate": "2025-07-17T12:14:16",
+          "payload[0].transDate": "2025-07-17T12:14:16"
+        }
+      ],
+      "operation": "save_temp",
+      "sample_name": "promotion"
+    }
+  ]
+}

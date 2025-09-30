@@ -5,7 +5,7 @@ from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 
 from models.connections.amazon_sqs_connection_config import AmazonSQSConnectionConfig
-from services.connections.queue_connection_service import QueueConnectionService
+from services.queue_connections.queue_connection_service import QueueConnectionService
 
 SHORT_VISIBILITY_TIMEOUT = 5
 DEFAULT_VISIBILITY_TIMEOUT = 30
@@ -53,3 +53,47 @@ class AmazonSQSConnectionService(QueueConnectionService):
                 results.append({"status": "error", "error": str(e), "message": msg})
 
         return results
+
+    def receive_messages(self,config: AmazonSQSConnectionConfig, max_messages: int = 10) -> list[Any]:
+        sqs: BaseClient = client(config)
+        test_connection(sqs,config)
+
+        all_msgs = []
+
+        to_receive = min(MAX_NUMBER_OF_MESSAGES, max_messages - len(all_msgs))
+        resp = sqs.receive_message(
+            QueueUrl=config.queueUrl,
+            MaxNumberOfMessages=to_receive,
+            WaitTimeSeconds=WAIT_TIME_SECONDS,
+            VisibilityTimeout=SHORT_VISIBILITY_TIMEOUT
+        )
+
+        msgs = resp.get("Messages", []) or []
+
+        if not msgs:
+            return all_msgs
+
+        for m in msgs:
+            all_msgs.append(m)
+
+        return all_msgs
+
+    def delete_messages(self,config: AmazonSQSConnectionConfig, messages: list[Any]) -> list[str]:
+        sqs: BaseClient = client(config)
+        test_connection(sqs,config)
+
+        deleted_msgs:list[str] = []
+        for m in messages:
+            try:
+                sqs.delete_message(
+                    QueueUrl=config.queueUrl,
+                    ReceiptHandle=m["ReceiptHandle"]
+                )
+                mid = m["MessageId"]
+                deleted_msgs.append(mid)
+                print(f" Messaggio eliminato  MessageId={mid} ")
+            except ClientError as e:
+                mid = m.get("MessageId", "unknown")
+                print(f" Errore eliminazione messaggio  MessageId={mid} Error={e}")
+
+        return deleted_msgs

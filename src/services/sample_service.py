@@ -3,7 +3,7 @@ from services.file_service import create_json_file_from_dict, load_json_file, fi
 
 SAMPLES_DIR = "samples"
 
-def create_sample(sample: JsonContainerDto):
+def save_sample(sample: JsonContainerDto):
     return create_json_file_from_dict(SAMPLES_DIR, sample.name, sample.json_data)
 
 def load_sample(sample_name: str) -> JsonContainerDto | None:

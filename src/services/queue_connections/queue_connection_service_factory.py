@@ -1,7 +1,7 @@
 from models.connections.amazon_sqs_connection_config import AmazonSQSConnectionConfig
 from models.connections.connection_config import ConnectionConfig
-from services.connections.amazon_sqs_connection_service import AmazonSQSConnectionService
-from services.connections.queue_connection_service import QueueConnectionService
+from services.queue_connections.amazon_sqs_connection_service import AmazonSQSConnectionService
+from services.queue_connections.queue_connection_service import QueueConnectionService
 
 
 class QueueConnectionServiceFactory:
