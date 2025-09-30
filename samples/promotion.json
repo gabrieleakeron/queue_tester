@@ -1,0 +1,22 @@
+{
+  "envelope": {
+    "marketCode": "CZ",
+    "domain": "Party",
+    "channelId": "ASLF",
+    "businessProcess": "teamChanges:slpromotion",
+    "senderSystem": "OMS"
+  },
+  "payload": [
+    {
+      "marketCode": "CZ",
+      "representativeId": "CZ04068288",
+      "representativeType": "salesleader",
+      "structureZone": "CZ012",
+      "structureDivision": "CZ01",
+      "salesLeaderId": null,
+      "slAppointDdate": "2025-07-17T12:14:16",
+      "transDate": "2025-07-17T12:14:16",
+      "campaign": "202507"
+    }
+  ]
+}
