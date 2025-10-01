@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 import boto3
@@ -37,11 +38,9 @@ class AmazonSQSConnectionService(QueueConnectionService):
         for msg in messages:
 
             try:
-                msg = str(msg)
-
                 resp = sqs.send_message(
                     QueueUrl=config.queueUrl,
-                    MessageBody=msg,
+                    MessageBody=json.dumps(msg),
                 )
 
                 mid = resp.get("MessageId")
