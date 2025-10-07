@@ -1,21 +1,38 @@
 from fastapi import APIRouter
 
-from models.connections.sqs_request_dto import SQSRequestMessagesDto, SQSRequestFindDto
+from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.sqs_request_dto import SQSRequestDto
+from models.connection_configs.sqs_request_find_dto import SQSRequestFindDto
+from models.connection_configs.sqs_request_messages_dto import SQSRequestMessagesDto
+from services.configurations.connection_service import load_connection
 from services.queue_connections.queue_connection_service_factory import QueueConnectionServiceFactory
 
 router = APIRouter(prefix="/queue-sqs")
 
+@router.post("/test")
+async def test_connection(t: SQSRequestDto):
+    connection_config: QueueConnectionConfigTypes = load_connection(t.connectionConfig)
+    if connection_config is None:
+        return {"message": f"Connection {t.connectionConfig} not found"}, 404
+    service = QueueConnectionServiceFactory.get_service(connection_config)
+    if not service.test_connection(connection_config):
+        return {"message": f"Connection is not valid"}, 400
+    return {"message": f"Connection is valid"}
+
 @router.post("/publish")
 async def publish_messages(m: SQSRequestMessagesDto):
-    service = QueueConnectionServiceFactory.get_service(m.config)
-    return service.publish_messages(m.config, m.messages)
+    connection_config:QueueConnectionConfigTypes = load_connection(m.connectionConfig)
+    service = QueueConnectionServiceFactory.get_service(connection_config)
+    return service.publish_messages(connection_config, m.messages)
 
 @router.post("/message")
 async def receive_messages(f: SQSRequestFindDto):
-    service = QueueConnectionServiceFactory.get_service(f.config)
-    return service.receive_messages(f.config, max_messages=f.count)
+    connection_config: QueueConnectionConfigTypes = load_connection(f.connectionConfig)
+    service = QueueConnectionServiceFactory.get_service(connection_config)
+    return service.receive_messages(connection_config, max_messages=f.count)
 
-@router.delete("/message")
-async def delete_messages(d:SQSRequestMessagesDto):
-    service = QueueConnectionServiceFactory.get_service(d.config)
-    return service.delete_messages(d.config, d.messages)
+@router.post("/ack")
+async def ack_messages(d:SQSRequestMessagesDto):
+    connection_config: QueueConnectionConfigTypes = load_connection(d.connectionConfig)
+    service = QueueConnectionServiceFactory.get_service(connection_config)
+    return service.ack_messages(connection_config, d.messages)

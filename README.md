@@ -24,4 +24,8 @@
     - pip compile requirements.in
     - pip install -r requirements.txt
 
+### SWAGGER
+    SWAGGER-UI: http://host:port/docs
+    OPENAPI JSON: http://host:port/openapi.json
+
 

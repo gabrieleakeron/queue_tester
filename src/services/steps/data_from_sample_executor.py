@@ -1,10 +1,10 @@
 import copy
 
-from models.connections.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.scenario import ScenarioDto
 from models.steps.step_dto import DataFromSampleStepDto
 from services.operations.operation_executor_composite import execute_operation
-from services.sample_service import load_sample
+from services.configurations.sample_service import load_sample
 from services.steps.step_executor import StepExecutor
 
 def set_nested(d: dict, dotted_key: str, value):

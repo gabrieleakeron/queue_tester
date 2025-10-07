@@ -1,10 +1,12 @@
+import json
 from typing import Any
 
 import boto3
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 
-from models.connections.amazon_sqs_connection_config import AmazonSQSConnectionConfig
+from models.connection_configs.amazon_sqs_connection_config import AmazonSQSConnectionConfig
+from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from services.queue_connections.queue_connection_service import QueueConnectionService
 
 SHORT_VISIBILITY_TIMEOUT = 5
@@ -28,6 +30,11 @@ def test_connection(sqs,config: AmazonSQSConnectionConfig):
 
 class AmazonSQSConnectionService(QueueConnectionService):
 
+    def test_connection(self, config: QueueConnectionConfigTypes) -> bool:
+        sqs = client(config)
+        test_connection(sqs,config)
+        return True
+
     def publish_messages(self,config:AmazonSQSConnectionConfig, messages:list[Any]) -> list[dict[str, Any]]:
 
         sqs = client(config)
@@ -37,17 +44,16 @@ class AmazonSQSConnectionService(QueueConnectionService):
         for msg in messages:
 
             try:
-                msg = str(msg)
-
                 resp = sqs.send_message(
                     QueueUrl=config.queueUrl,
-                    MessageBody=msg,
+                    MessageBody=json.dumps(msg),
                 )
 
                 mid = resp.get("MessageId")
                 http_status = resp.get("ResponseMetadata", {}).get("HTTPStatusCode")
 
                 results.append({"status": "ok", "message_id": mid, "http_status": http_status})
+                print(f" Messaggio pubblicato  MessageId={mid} ")
 
             except Exception as e:
                 results.append({"status": "error", "error": str(e), "message": msg})
@@ -60,7 +66,7 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         all_msgs = []
 
-        to_receive = min(MAX_NUMBER_OF_MESSAGES, max_messages - len(all_msgs))
+        to_receive = min(MAX_NUMBER_OF_MESSAGES, max_messages)
         resp = sqs.receive_message(
             QueueUrl=config.queueUrl,
             MaxNumberOfMessages=to_receive,
@@ -76,9 +82,11 @@ class AmazonSQSConnectionService(QueueConnectionService):
         for m in msgs:
             all_msgs.append(m)
 
+        print(f" Messaggi ricevuti: {len(msgs)} ")
+
         return all_msgs
 
-    def delete_messages(self,config: AmazonSQSConnectionConfig, messages: list[Any]) -> list[str]:
+    def ack_messages(self, config: AmazonSQSConnectionConfig, messages: list[Any]):
         sqs: BaseClient = client(config)
         test_connection(sqs,config)
 

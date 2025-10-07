@@ -1,5 +1,5 @@
 from models.json_container_dto import JsonContainerDto
-from services.file_service import create_json_file_from_dict, load_json_file, find_files_name_in_dir
+from services.configurations.file_service import create_json_file_from_dict, load_json_file, find_files_name_in_dir, delete_file
 
 SAMPLES_DIR = "samples"
 
@@ -12,3 +12,9 @@ def load_sample(sample_name: str) -> JsonContainerDto | None:
 
 def find_samples()->list[str]:
     return find_files_name_in_dir(SAMPLES_DIR)
+
+def find_sample_json(name:str)->dict | list[dict]:
+    return load_json_file(SAMPLES_DIR, name)
+
+def delete_sample(name: str) -> bool:
+    return delete_file(SAMPLES_DIR,name)

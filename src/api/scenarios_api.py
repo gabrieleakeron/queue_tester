@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from services.scenario_service import execute_scenario
+from services.configurations.scenario_service import execute_scenario
 
 router = APIRouter(prefix="/scenario")
 

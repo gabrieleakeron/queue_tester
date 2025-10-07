@@ -1,10 +1,15 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from models.connections.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 
 
 class QueueConnectionService(ABC):
+
+    @abstractmethod
+    def test_connection(self, config: QueueConnectionConfigTypes) -> bool:
+        pass
+
     @abstractmethod
     def publish_messages(
             self,
@@ -21,7 +26,7 @@ class QueueConnectionService(ABC):
         pass
 
     @abstractmethod
-    def delete_messages(
+    def ack_messages(
             self,
             config: QueueConnectionConfigTypes,
             messages: list[Any]

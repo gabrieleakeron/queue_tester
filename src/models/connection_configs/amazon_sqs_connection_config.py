@@ -1,4 +1,4 @@
-from models.connections.connection_config import ConnectionConfig
+from models.connection_configs.connection_config import ConnectionConfig
 
 
 class AmazonSQSConnectionConfig(ConnectionConfig):
