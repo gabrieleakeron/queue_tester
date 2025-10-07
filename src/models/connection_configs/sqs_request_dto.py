@@ -4,4 +4,4 @@ from models.connection_configs.connection_config_types import QueueConnectionCon
 
 
 class SQSRequestDto(BaseModel):
-    config:QueueConnectionConfigTypes
+    connectionConfig:str
