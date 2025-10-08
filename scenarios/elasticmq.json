@@ -1,0 +1,13 @@
+{
+  "name": "elasticmq",
+  "description": "Crea 6 representative di cui uno duplicato",
+  "connectionConfig": "local-elasticmq",
+  "steps": [
+    {
+      "stepType": "data-from-server",
+      "description": "aggiungo i representative",
+      "data_name": "registration_with_duplication_data",
+      "operation": "publish"
+    }
+  ]
+}

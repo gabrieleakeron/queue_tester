@@ -4,9 +4,11 @@ from typing import Any
 import boto3
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
+from urllib.parse import urlparse
 
 from models.connection_configs.amazon_sqs_connection_config import AmazonSQSConnectionConfig
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.create_queue_dto import CreateQueueDto
 from services.queue_connections.queue_connection_service import QueueConnectionService
 
 SHORT_VISIBILITY_TIMEOUT = 5
@@ -14,10 +16,15 @@ DEFAULT_VISIBILITY_TIMEOUT = 30
 MAX_NUMBER_OF_MESSAGES = 10
 WAIT_TIME_SECONDS = 20
 
+def extract_endpoint_from_queue_url(queue_url: str) -> str:
+    parsed = urlparse(queue_url)
+    return f"{parsed.scheme}://{parsed.hostname}:{parsed.port}" if parsed.port else f"{parsed.scheme}://{parsed.hostname}"
+
 def client(config: AmazonSQSConnectionConfig)->BaseClient:
     return boto3.client(
         "sqs",
         region_name=config.region,
+        endpoint_url=extract_endpoint_from_queue_url(config.queueUrl),
         aws_access_key_id=config.accessKeyId,
         aws_secret_access_key=config.secretsAccessKey,
     )
@@ -105,3 +112,36 @@ class AmazonSQSConnectionService(QueueConnectionService):
                 print(f" Errore eliminazione messaggio  MessageId={mid} Error={e}")
 
         return deleted_msgs
+
+    def create_queue(self,config:AmazonSQSConnectionConfig, c: CreateQueueDto):
+        sqs: BaseClient = client(config)
+        test_connection(sqs,config)
+
+        attributes = self.create_attributes(c)
+
+        try:
+            resp = sqs.create_queue(
+                QueueName=c.queue.name,
+                Attributes=attributes
+            )
+            queue_url = resp.get("QueueUrl")
+            print(f" Coda creata: {queue_url} ")
+            return {"queueUrl": queue_url}
+
+        except ClientError as e:
+            raise Exception(f"Error creating SQS queue: {e}")
+
+    def create_attributes(self, c):
+        attributes = {
+            "VisibilityTimeout": str(c.queue.defaultVisibilityTimeout or DEFAULT_VISIBILITY_TIMEOUT),
+            "DelaySeconds": str(c.queue.delay or 0),
+            "ReceiveMessageWaitTimeSeconds": str(c.queue.receiveMessageWait or 0),
+        }
+        if c.queue.fifoQueue:
+            attributes["FifoQueue"] = "true"
+            if not c.queue.name.endswith(".fifo"):
+                c.queue.name += ".fifo"
+            if c.queue.contentBasedDeduplication:
+                attributes["ContentBasedDeduplication"] = "true"
+
+        return attributes
