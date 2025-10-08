@@ -28,6 +28,9 @@
     SWAGGER-UI: http://host:port/docs
     OPENAPI JSON: http://host:port/openapi.json
 
+### POSTMAN
+    - importare il file postman/collection.json
+
 ### DOCKER
     - docker-compose up -d --build
     - docker-compose down
