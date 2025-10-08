@@ -28,4 +28,12 @@
     SWAGGER-UI: http://host:port/docs
     OPENAPI JSON: http://host:port/openapi.json
 
+### DOCKER
+    - docker-compose up -d --build
+    - docker-compose down
+
+### ELASTICMQ
+    - http://localhost:9325
+
+
 

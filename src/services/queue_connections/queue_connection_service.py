@@ -3,6 +3,8 @@ from typing import Any
 
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.connection_configs.create_queue_dto import CreateQueueDto
+from models.connection_configs.delete_queue_dto import DeleteQueueDto
+from models.queue_dto import QueueDto
 
 
 class QueueConnectionService(ABC):
@@ -35,5 +37,9 @@ class QueueConnectionService(ABC):
         pass
 
     @abstractmethod
-    def create_queue(self, connection_config:QueueConnectionConfigTypes, c: CreateQueueDto):
+    def create_queue(self, connection_config:QueueConnectionConfigTypes, q: QueueDto):
+        pass
+
+    @abstractmethod
+    def delete_queue(self, connection_config:QueueConnectionConfigTypes, name:str):
         pass

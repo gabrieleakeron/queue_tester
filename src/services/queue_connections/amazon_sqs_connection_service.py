@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from models.connection_configs.amazon_sqs_connection_config import AmazonSQSConnectionConfig
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.connection_configs.create_queue_dto import CreateQueueDto
+from models.queue_dto import QueueDto
 from services.queue_connections.queue_connection_service import QueueConnectionService
 
 SHORT_VISIBILITY_TIMEOUT = 5
@@ -113,15 +114,15 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         return deleted_msgs
 
-    def create_queue(self,config:AmazonSQSConnectionConfig, c: CreateQueueDto):
+    def create_queue(self,config:AmazonSQSConnectionConfig, q: QueueDto):
         sqs: BaseClient = client(config)
         test_connection(sqs,config)
 
-        attributes = self.create_attributes(c)
+        attributes = self.create_attributes(q)
 
         try:
             resp = sqs.create_queue(
-                QueueName=c.queue.name,
+                QueueName=q.name,
                 Attributes=attributes
             )
             queue_url = resp.get("QueueUrl")
@@ -131,17 +132,29 @@ class AmazonSQSConnectionService(QueueConnectionService):
         except ClientError as e:
             raise Exception(f"Error creating SQS queue: {e}")
 
-    def create_attributes(self, c):
+    def create_attributes(self, q:QueueDto):
         attributes = {
-            "VisibilityTimeout": str(c.queue.defaultVisibilityTimeout or DEFAULT_VISIBILITY_TIMEOUT),
-            "DelaySeconds": str(c.queue.delay or 0),
-            "ReceiveMessageWaitTimeSeconds": str(c.queue.receiveMessageWait or 0),
+            "VisibilityTimeout": str(q.defaultVisibilityTimeout or DEFAULT_VISIBILITY_TIMEOUT),
+            "DelaySeconds": str(q.delay or 0),
+            "ReceiveMessageWaitTimeSeconds": str(q.receiveMessageWait or 0),
         }
-        if c.queue.fifoQueue:
+
+        if q.fifoQueue:
             attributes["FifoQueue"] = "true"
-            if not c.queue.name.endswith(".fifo"):
-                c.queue.name += ".fifo"
-            if c.queue.contentBasedDeduplication:
+            if not q.name.endswith(".fifo"):
+                q.name += ".fifo"
+            if q.contentBasedDeduplication:
                 attributes["ContentBasedDeduplication"] = "true"
 
         return attributes
+
+    def delete_queue(self,config:AmazonSQSConnectionConfig, name:str):
+        sqs: BaseClient = client(config)
+        test_connection(sqs,config)
+
+        try:
+            sqs.delete_queue(QueueUrl=config.queueUrl)
+            print(f" Coda eliminata: {config.queueUrl} ")
+            return {"message": f"Queue {name} deleted successfully"}
+        except ClientError as e:
+            raise Exception(f"Error deleting SQS queue: {e}")

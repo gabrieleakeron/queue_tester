@@ -216,3 +216,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 connections/
+src/data/*.db
+src/data/*.db-shm
+src/data/*.db-wal
