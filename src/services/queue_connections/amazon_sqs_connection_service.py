@@ -9,8 +9,10 @@ from urllib.parse import urlparse
 from models.connection_configs.amazon_sqs_connection_config import AmazonSQSConnectionConfig
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.connection_configs.create_queue_dto import CreateQueueDto
+from models.json_type import JsonType
 from models.queue_dto import QueueDto
 from services.queue_connections.queue_connection_service import QueueConnectionService
+from services.sqlite.json_files_service import JsonFilesService
 
 SHORT_VISIBILITY_TIMEOUT = 5
 DEFAULT_VISIBILITY_TIMEOUT = 30
@@ -116,7 +118,6 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
     def create_queue(self,config:AmazonSQSConnectionConfig, q: QueueDto):
         sqs: BaseClient = client(config)
-        test_connection(sqs,config)
 
         attributes = self.create_attributes(q)
 
@@ -148,13 +149,23 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         return attributes
 
-    def delete_queue(self,config:AmazonSQSConnectionConfig, name:str):
+    def delete_queue(self,config:AmazonSQSConnectionConfig):
         sqs: BaseClient = client(config)
-        test_connection(sqs,config)
-
         try:
             sqs.delete_queue(QueueUrl=config.queueUrl)
             print(f" Coda eliminata: {config.queueUrl} ")
-            return {"message": f"Queue {name} deleted successfully"}
+            JsonFilesService.delete_json_by_name_and_type(config.name,JsonType.CONNECTION)
+            print(f" Config eliminata: {config.name} ")
+            return {"message": f"Queue {config.queueUrl} deleted successfully and config {config.name} removed"}
         except ClientError as e:
             raise Exception(f"Error deleting SQS queue: {e}")
+
+    def list_queues(self,config:AmazonSQSConnectionConfig):
+        sqs: BaseClient = client(config)
+        try:
+            resp = sqs.list_queues()
+            queue_urls = resp.get("QueueUrls", [])
+            print(f" Code trovate: {len(queue_urls)} ")
+            return {"queueUrls": queue_urls}
+        except ClientError as e:
+            raise Exception(f"Error listing SQS queues: {e}")

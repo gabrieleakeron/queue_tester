@@ -4,9 +4,9 @@ from models.logs.log_type import LogType, LogLevel
 from services.sqlite.connection_factory import ConnectionFactory
 
 def log(message:str, log_type:LogType=LogType.ELABORATION, level:LogLevel=LogLevel.INFO):
-    ScenarioResultsService.insert(log_type, level, message)
+    LogService.insert(log_type, level, message)
 
-class ScenarioResultsService:
+class LogService:
 
     @classmethod
     def insert(cls, l_type:LogType, l_level:LogLevel,message:str)->str:

@@ -2,7 +2,6 @@ from fastapi import APIRouter
 
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.connection_configs.create_queue_dto import CreateQueueDto
-from models.connection_configs.delete_queue_dto import DeleteQueueDto
 from models.connection_configs.sqs_request_dto import SQSRequestDto
 from models.connection_configs.sqs_request_find_dto import SQSRequestFindDto
 from models.connection_configs.sqs_request_messages_dto import SQSRequestMessagesDto
@@ -12,16 +11,22 @@ from services.queue_connections.queue_connection_service_factory import QueueCon
 router = APIRouter(prefix="/queue-sqs")
 
 @router.post("/")
+async def list_queues(c: SQSRequestDto):
+    connection_config: QueueConnectionConfigTypes = load_connection(c.connectionConfig)
+    service = QueueConnectionServiceFactory.get_service(connection_config)
+    return service.list_queues(connection_config)
+
+@router.post("/")
 async def create_queue(c: CreateQueueDto):
     connection_config: QueueConnectionConfigTypes = load_connection(c.connectionConfig)
     service = QueueConnectionServiceFactory.get_service(connection_config)
     return service.create_queue(connection_config,c.queue)
 
 @router.delete("/")
-async def delete_queue(d: DeleteQueueDto):
+async def delete_queue(d: SQSRequestDto):
     connection_config: QueueConnectionConfigTypes = load_connection(d.connectionConfig)
     service = QueueConnectionServiceFactory.get_service(connection_config)
-    return service.delete_queue(connection_config,d.name)
+    return service.delete_queue(connection_config)
 
 @router.post("/publish")
 async def publish_messages(m: SQSRequestMessagesDto):
