@@ -1,5 +1,5 @@
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
-from models.scenario import ScenarioDto
+from models.scenario_dto import ScenarioDto
 from models.steps.step_dto import DataStepDTO, DataFromSampleStepDto, SleepStepDto, DataFromServerStepDto, \
     StepDto, StepDtoTypes
 from services.steps.data_from_sample_executor import DataFromSampleExecutor

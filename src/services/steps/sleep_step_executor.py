@@ -1,7 +1,7 @@
 import time
 
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
-from models.scenario import ScenarioDto
+from models.scenario_dto import ScenarioDto
 from models.steps.step_dto import SleepStepDto
 from services.steps.step_executor import StepExecutor
 

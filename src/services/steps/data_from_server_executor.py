@@ -1,7 +1,7 @@
 
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.json_container_dto import JsonContainerDto
-from models.scenario import ScenarioDto
+from models.scenario_dto import ScenarioDto
 from models.steps.step_dto import DataFromServerStepDto
 from services.db.data_service import load_data
 from services.operations.operation_executor_composite import execute_operation

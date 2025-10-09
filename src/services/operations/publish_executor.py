@@ -1,6 +1,6 @@
 from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
 from models.operation import Operation
-from models.scenario import ScenarioDto
+from models.scenario_dto import ScenarioDto
 from models.steps.step_dto import StepDto
 from services.operations.operation_executor import OperationExecutor
 from services.queue_connections.queue_connection_service_factory import QueueConnectionServiceFactory
