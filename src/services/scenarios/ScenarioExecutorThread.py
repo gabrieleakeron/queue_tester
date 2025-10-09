@@ -1,6 +1,6 @@
 import threading
 
-from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.queues.queue_connection_config_types import QueueConnectionConfigTypes
 from models.json_type import JsonType
 from models.logs.log_type import LogLevel
 from models.scenario_dto import ScenarioDto
@@ -22,7 +22,7 @@ class ScenarioExecutorThread(threading.Thread):
         self.scenario_dto = ScenarioDto.model_validate(self.payload)
 
         connection_cfg = self.scenario_dto.connectionConfig
-        payload = JsonFilesService.get_json_by_name_and_type(connection_cfg, JsonType.CONNECTION)
+        payload = JsonFilesService.get_json_by_name_and_type(connection_cfg, JsonType.QUEUE_CONNECTION)
         if not payload:
             raise ValueError(f"Connection config {connection_cfg} for scenario '{self.scenario_dto.name}' not found")
 

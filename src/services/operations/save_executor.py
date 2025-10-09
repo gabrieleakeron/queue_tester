@@ -1,7 +1,6 @@
 import json
-from pathlib import Path
 
-from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.queues.queue_connection_config_types import QueueConnectionConfigTypes
 from models.operation import Operation
 from models.scenario_dto import ScenarioDto
 from models.steps.step_dto import StepDto

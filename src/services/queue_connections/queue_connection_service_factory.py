@@ -1,5 +1,6 @@
-from models.connection_configs.amazon_sqs_connection_config import AmazonSQSConnectionConfig
+from models.connection_configs.brokers.amazon_broker_connection_config import AmazonBrokerConnectionConfig
 from models.connection_configs.connection_config import ConnectionConfig
+from models.connection_configs.queues.amazon_sqs_connection_config import AmazonSQSConnectionConfig
 from services.queue_connections.amazon_sqs_connection_service import AmazonSQSConnectionService
 from services.queue_connections.queue_connection_service import QueueConnectionService
 
@@ -8,6 +9,7 @@ class QueueConnectionServiceFactory:
 
     _CONNECTOR_MAPPING: dict[type[ConnectionConfig], type[QueueConnectionService]] = {
         AmazonSQSConnectionConfig: AmazonSQSConnectionService,
+        AmazonBrokerConnectionConfig:AmazonSQSConnectionService
     }
 
     @classmethod

@@ -1,0 +1,3 @@
+from models.connection_configs.queues.amazon_sqs_connection_config import AmazonSQSConnectionConfig
+
+QueueConnectionConfigTypes = AmazonSQSConnectionConfig

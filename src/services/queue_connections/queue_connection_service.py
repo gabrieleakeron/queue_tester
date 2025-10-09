@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-from models.connection_configs.connection_config_types import QueueConnectionConfigTypes
-from models.queue_dto import QueueDto
+from models.connection_configs.queues.queue_connection_config_types import QueueConnectionConfigTypes
 
 
 class QueueConnectionService(ABC):
@@ -34,13 +33,3 @@ class QueueConnectionService(ABC):
     ) -> list[str]:
         pass
 
-    @abstractmethod
-    def create_queue(self, connection_config:QueueConnectionConfigTypes, q: QueueDto):
-        pass
-
-    @abstractmethod
-    def delete_queue(self, connection_config:QueueConnectionConfigTypes):
-        pass
-
-    def list_queues(self, connection_config:QueueConnectionConfigTypes):
-        pass

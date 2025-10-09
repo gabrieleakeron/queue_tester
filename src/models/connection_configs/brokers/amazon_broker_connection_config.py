@@ -1,12 +1,9 @@
 from models.connection_configs.connection_config import ConnectionConfig
 
 
-class AmazonSQSConnectionConfig(ConnectionConfig):
+class AmazonBrokerConnectionConfig(ConnectionConfig):
     sourceType: str = "amazon-sqs"
+    endpointUrl:str
     region:str
-    queueUrl:str
     secretsAccessKey:str
     accessKeyId:str
-    consume:bool = False
-    payloadSchema: str | None = None
-    payloadSample: str | None = None
