@@ -1,3 +1,7 @@
+networks:
+  net:
+    name: qsmith-network
+
 services:
 
   appsmith:
@@ -7,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      qsmith-network:
+      - net
     volumes:
       - ./stacks:/appsmith-stacks
     restart: unless-stopped
@@ -18,6 +22,8 @@ services:
     ports:
       - "9324:9324"
       - "9325:9325"
+    networks:
+      - net
     volumes:
       - ./elasticmq.conf:/opt/elasticmq.conf
 
@@ -34,9 +40,6 @@ services:
     ports:
       - "8082:8082"
     networks:
-      - qsmith-network
+      - net
     environment:
       - PYTHONPATH=/app
-
-networks:
-  qsmith-network:
