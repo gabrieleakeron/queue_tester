@@ -220,3 +220,4 @@ src/data/*.db
 src/data/*.db-shm
 src/data/*.db-wal
 stacks/
+data/

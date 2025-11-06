@@ -6,52 +6,58 @@ import boto3
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 
-from models.connection_configs.queues.amazon_sqs_connection_config import AmazonSQSConnectionConfig
-from models.connection_configs.queues.queue_connection_config_types import QueueConnectionConfigTypes
+from models.connection_configs.brokers.amazon_broker_connection_config import AmazonBrokerConnectionConfig
 from services.queue_connections.queue_connection_service import QueueConnectionService
+from services.sqlite.queue_service import QueueService
 
+DOCKER_HOST_IP = "host.docker.internal"
 SHORT_VISIBILITY_TIMEOUT = 5
 DEFAULT_VISIBILITY_TIMEOUT = 30
 MAX_NUMBER_OF_MESSAGES = 10
 WAIT_TIME_SECONDS = 20
 
-def extract_endpoint_from_queue_url(queue_url: str) -> str:
-    parsed = urlparse(queue_url)
-    return f"{parsed.scheme}://{parsed.hostname}:{parsed.port}" if parsed.port else f"{parsed.scheme}://{parsed.hostname}"
+def extract_url_from_queue(queue: str) -> str:
+    queue_dto = QueueService.get_by_name(queue)
+    if not queue:
+        raise Exception(f"Queue {queue} not found")
+    return queue_dto.url.replace("localhost", DOCKER_HOST_IP)
 
-def client(config: AmazonSQSConnectionConfig)->BaseClient:
+def client(config: AmazonBrokerConnectionConfig)->BaseClient:
     return boto3.client(
         "sqs",
         region_name=config.region,
-        endpoint_url=extract_endpoint_from_queue_url(config.queueUrl),
+        endpoint_url=config.endpointUrl,
         aws_access_key_id=config.accessKeyId,
         aws_secret_access_key=config.secretsAccessKey,
     )
 
-def test_connection(sqs,config: AmazonSQSConnectionConfig):
+def test_connection(sqs,queue_url:str):
     try:
-        sqs.get_queue_attributes(QueueUrl=config.queueUrl, AttributeNames=["All"])
+        sqs.get_queue_attributes(QueueUrl=queue_url, AttributeNames=["All"])
     except ClientError as e:
         raise Exception(f"Error accessing SQS queue: {e}")
 
 class AmazonSQSConnectionService(QueueConnectionService):
 
-    def test_connection(self, config: QueueConnectionConfigTypes) -> bool:
+    def test_connection(self, config:AmazonBrokerConnectionConfig, queue:str) -> bool:
         sqs = client(config)
-        test_connection(sqs,config)
+        queue_url  = extract_url_from_queue(queue)
+        print("queue_url: "+queue_url)
+        test_connection(sqs,queue_url)
         return True
 
-    def publish_messages(self,config:AmazonSQSConnectionConfig, messages:list[Any]) -> list[dict[str, Any]]:
+    def publish_messages(self, config:AmazonBrokerConnectionConfig, queue:str, messages:list[Any]) -> list[dict[str, Any]]:
 
         sqs = client(config)
-        test_connection(sqs,config)
+        queue_url  = extract_url_from_queue(queue)
+        test_connection(sqs,queue_url)
         results = []
 
         for msg in messages:
 
             try:
                 resp = sqs.send_message(
-                    QueueUrl=config.queueUrl,
+                    QueueUrl=queue_url,
                     MessageBody=json.dumps(msg),
                 )
 
@@ -66,15 +72,16 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         return results
 
-    def receive_messages(self,config: AmazonSQSConnectionConfig, max_messages: int = 10) -> list[Any]:
+    def receive_messages(self, config:AmazonBrokerConnectionConfig, queue:str, max_messages: int = 10) -> list[Any]:
         sqs: BaseClient = client(config)
-        test_connection(sqs,config)
+        queue_url  = extract_url_from_queue(queue)
+        test_connection(sqs,queue_url)
 
         all_msgs = []
 
         to_receive = min(MAX_NUMBER_OF_MESSAGES, max_messages)
         resp = sqs.receive_message(
-            QueueUrl=config.queueUrl,
+            QueueUrl=queue_url,
             MaxNumberOfMessages=to_receive,
             WaitTimeSeconds=WAIT_TIME_SECONDS,
             VisibilityTimeout=SHORT_VISIBILITY_TIMEOUT
@@ -92,19 +99,23 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
         return all_msgs
 
-    def ack_messages(self, config: AmazonSQSConnectionConfig, messages: list[Any]):
+    def ack_messages(self, config:AmazonBrokerConnectionConfig, queue:str, messages: list[Any])-> list[dict]:
         sqs: BaseClient = client(config)
-        test_connection(sqs,config)
+        queue_url  = extract_url_from_queue(queue)
+        test_connection(sqs,queue_url)
 
-        deleted_msgs:list[str] = []
+        deleted_msgs:list[dict] = []
         for m in messages:
             try:
                 sqs.delete_message(
-                    QueueUrl=config.queueUrl,
+                    QueueUrl=queue_url,
                     ReceiptHandle=m["ReceiptHandle"]
                 )
                 mid = m["MessageId"]
-                deleted_msgs.append(mid)
+                deleted_msgs.append({
+                    "status": "ok",
+                    "message_id": mid
+                })
                 print(f" Messaggio eliminato  MessageId={mid} ")
             except ClientError as e:
                 mid = m.get("MessageId", "unknown")

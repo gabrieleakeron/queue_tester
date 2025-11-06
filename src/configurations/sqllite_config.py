@@ -19,6 +19,17 @@ def init_db():
         """)
 
         cx.execute("""
+            CREATE TABLE IF NOT EXISTS queues(
+              id TEXT PRIMARY KEY,
+              broker TEXT,
+              name TEXT,
+              payload TEXT,
+              created_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+              modified_date DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        cx.execute("""
             CREATE TABLE IF NOT EXISTS scenario_results(
               id TEXT PRIMARY KEY,
               scenario TEXT NOT NULL,

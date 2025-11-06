@@ -1,7 +1,7 @@
 import sqlite3
 import os
 
-DB_PATH = "data/queue_tester.db"
+DB_PATH = "data/qsmith.db"
 
 class ConnectionFactory:
     @classmethod

@@ -4,6 +4,7 @@ from botocore.exceptions import ClientError
 
 from models.connection_configs.brokers.amazon_broker_connection_config import AmazonBrokerConnectionConfig
 from models.queue_dto import QueueDto
+from models.sqs_requests.create_queue_dto import CreateQueueDto
 from services.broker_connections.broker_connection_service import BrokerConnectionService
 
 DEFAULT_VISIBILITY_TIMEOUT = 30
@@ -19,7 +20,7 @@ def client(config: AmazonBrokerConnectionConfig)->BaseClient:
 
 class AmazonBrokerConnectionService(BrokerConnectionService):
 
-    def create_queue(self,config:AmazonBrokerConnectionConfig, q: QueueDto):
+    def create_queue(self,config:AmazonBrokerConnectionConfig, q: CreateQueueDto):
         sqs: BaseClient = client(config)
 
         attributes = self.create_attributes(q)
@@ -36,7 +37,7 @@ class AmazonBrokerConnectionService(BrokerConnectionService):
         except ClientError as e:
             raise Exception(f"Error creating SQS queue: {e}")
 
-    def create_attributes(self, q:QueueDto):
+    def create_attributes(self, q:CreateQueueDto):
         attributes = {
             "VisibilityTimeout": str(q.defaultVisibilityTimeout or DEFAULT_VISIBILITY_TIMEOUT),
             "DelaySeconds": str(q.delay or 0),
@@ -52,12 +53,12 @@ class AmazonBrokerConnectionService(BrokerConnectionService):
 
         return attributes
 
-    def delete_queue(self, config:AmazonBrokerConnectionConfig, queueUrl:str):
+    def delete_queue(self, config:AmazonBrokerConnectionConfig, queue_url:str):
         sqs: BaseClient = client(config)
         try:
-            sqs.delete_queue(QueueUrl=queueUrl)
-            print(f" Coda eliminata: {queueUrl} ")
-            return {"message": f"Queue {queueUrl} deleted successfully"}
+            sqs.delete_queue(QueueUrl=queue_url)
+            print(f" Coda eliminata: {queue_url} ")
+            return {"message": f"Queue {queue_url} deleted successfully"}
         except ClientError as e:
             raise Exception(f"Error deleting SQS queue: {e}")
 

@@ -3,6 +3,7 @@ import uuid
 from typing import Any
 
 from exceptions.app_exception import AppException
+from models.json_container_dto import JsonContainerDto
 from models.json_type import JsonType
 from services.sqlite.connection_factory import ConnectionFactory
 
@@ -48,6 +49,23 @@ class JsonFilesService:
             """, (j_type.value,))
             rows = cursor.fetchall()
             return [row[0] for row in rows]
+
+    @classmethod
+    def get_jsons_by_type(cls,j_type: JsonType)->list[JsonContainerDto]:
+        with ConnectionFactory.create_connection() as cx:
+            cursor = cx.execute("""
+                SELECT name,payload
+                FROM json_files
+                WHERE type = ?
+            """, (j_type.value,))
+            rows = cursor.fetchall()
+            result = []
+            for row in rows:
+                name = row[0]
+                json_data = json.loads(row[1])
+                dto = JsonContainerDto(name=name, json_data=json_data)
+                result.append(dto)
+            return result
 
     @classmethod
     def delete_json_by_name_and_type(cls, name: str, j_type: JsonType)->Any:

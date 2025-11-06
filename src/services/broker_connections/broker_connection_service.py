@@ -1,12 +1,12 @@
 from abc import ABC, abstractmethod
 
 from models.connection_configs.brokers.broker_connection_config_types import BrokerConnectionConfigTypes
-from models.queue_dto import QueueDto
+from models.sqs_requests.create_queue_dto import CreateQueueDto
 
 
 class BrokerConnectionService(ABC):
     @abstractmethod
-    def create_queue(self, connection_config:BrokerConnectionConfigTypes, q: QueueDto):
+    def create_queue(self, connection_config:BrokerConnectionConfigTypes, q: CreateQueueDto):
         pass
 
     @abstractmethod
