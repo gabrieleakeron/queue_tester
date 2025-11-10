@@ -1,12 +1,12 @@
 import json
 from typing import Any
-from urllib.parse import urlparse
 
 import boto3
 from botocore.client import BaseClient
 from botocore.exceptions import ClientError
 
 from models.connection_configs.brokers.amazon_broker_connection_config import AmazonBrokerConnectionConfig
+from models.queue_dto import QueueDto
 from services.queue_connections.queue_connection_service import QueueConnectionService
 from services.sqlite.queue_service import QueueService
 
@@ -16,10 +16,9 @@ DEFAULT_VISIBILITY_TIMEOUT = 30
 MAX_NUMBER_OF_MESSAGES = 10
 WAIT_TIME_SECONDS = 20
 
-def extract_url_from_queue(queue: str) -> str:
-    queue_dto = QueueService.get_by_name(queue)
-    if not queue:
-        raise Exception(f"Queue {queue} not found")
+def extract_url_from_queue(queue_dto:QueueDto) -> str:
+    if not queue_dto:
+        raise Exception(f"Queue {queue_dto} not found")
     return queue_dto.url.replace("localhost", DOCKER_HOST_IP)
 
 def client(config: AmazonBrokerConnectionConfig)->BaseClient:
@@ -49,7 +48,8 @@ class AmazonSQSConnectionService(QueueConnectionService):
     def publish_messages(self, config:AmazonBrokerConnectionConfig, queue:str, messages:list[Any]) -> list[dict[str, Any]]:
 
         sqs = client(config)
-        queue_url  = extract_url_from_queue(queue)
+        queue_dto:QueueDto = QueueService.get_by_name(queue)
+        queue_url  = extract_url_from_queue(queue_dto)
         test_connection(sqs,queue_url)
         results = []
 
@@ -59,6 +59,7 @@ class AmazonSQSConnectionService(QueueConnectionService):
                 resp = sqs.send_message(
                     QueueUrl=queue_url,
                     MessageBody=json.dumps(msg),
+                    MessageGroupId= "default" if queue_dto.fifoQueue else None
                 )
 
                 mid = resp.get("MessageId")
@@ -74,7 +75,8 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
     def receive_messages(self, config:AmazonBrokerConnectionConfig, queue:str, max_messages: int = 10) -> list[Any]:
         sqs: BaseClient = client(config)
-        queue_url  = extract_url_from_queue(queue)
+        queue_dto: QueueDto = QueueService.get_by_name(queue)
+        queue_url  = extract_url_from_queue(queue_dto)
         test_connection(sqs,queue_url)
 
         all_msgs = []
@@ -101,7 +103,8 @@ class AmazonSQSConnectionService(QueueConnectionService):
 
     def ack_messages(self, config:AmazonBrokerConnectionConfig, queue:str, messages: list[Any])-> list[dict]:
         sqs: BaseClient = client(config)
-        queue_url  = extract_url_from_queue(queue)
+        queue_dto: QueueDto = QueueService.get_by_name(queue)
+        queue_url  = extract_url_from_queue(queue_dto)
         test_connection(sqs,queue_url)
 
         deleted_msgs:list[dict] = []

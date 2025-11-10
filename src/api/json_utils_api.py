@@ -3,15 +3,17 @@ import json
 from fastapi import APIRouter
 from genson import SchemaBuilder
 
+from models.json_container_dto import JsonContainerDto
+
 router = APIRouter(prefix="/json_utils")
 
 @router.post("/schema")
-async def extract_schema(json_input:str)->str:
+async def extract_schema(dto:JsonContainerDto)-> dict | str:
     try:
-        data = json.loads(json_input)
         builder = SchemaBuilder()
-        builder.add_object(data)
+        builder.add_object(dto.json_data)
         schema = builder.to_schema()
-        return json.dumps(schema, indent=2)
+        schema['title'] = dto.name
+        return schema
     except json.JSONDecodeError:
         return "Invalid JSON input."
